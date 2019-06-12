@@ -108,7 +108,13 @@ var anotherPerson = person;
 
 person.name = "Manu";
 
-console.log(anotherPerson.name) // Manu
+console.log(person.name); // Manu
+console.log(anotherPerson.name); // Manu
+
+anotherPerson.name = "Bob"
+
+console.log(person.name); // Bob
+console.log(anotherPerson.name); // Bob
 ```
 
 _anotherPerson_ have the same value as the first _person_ but it will not actually have copied the value of the person object. Instead, _anotherPerson_ store a pointer to the _person_ object in memory. 
