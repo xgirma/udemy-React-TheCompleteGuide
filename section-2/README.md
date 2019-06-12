@@ -151,21 +151,125 @@ console.log(count); // [1, 2, 3, 4]
 console.log(double); // [2, 4, 6]
 ```
 
-## ES6 Way to Clone an Array :sheep:
+## ES6 Way to Clone an Array (copy by value)
 source: https://www.samanthaming.com/tidbits/35-es6-way-to-clone-an-array
 
 When we need to copy an array, we often times used slice. But with ES6, you can also use the spread operator to duplicate an array. Pretty nifty, right. 
 
 ```javascript
-const sheeps = [:sheep:, :sheep:, :sheep:];
+const sheeps = [1, 2, 3];
 
 // Old way
 const cloneSheeps = sheeps.slice();
 
 // ES6 way
 const cloneSheepsES6 = [...sheeps];
+
+console.log(sheeps === cloneSheeps); // false
+console.log(sheeps === cloneSheepsES6); // false
 ```
 
+### Why Can’t I Use = to Copy an Array?
+Because arrays in JS are reference values, so when you try to copy it using the = it will only copy the reference to the original array and not the value of the array. To create a real copy of an array, you need to copy over the value of the array under a new value variable. That way this new array does not reference to the old array address in memory.
+
+```javascript
+const sheeps = [1, 2, 3];
+
+const fakeSheeps = sheeps;
+const cloneSheeps = [...sheeps];
+
+console.log(sheeps === fakeSheeps);
+// true --> it's pointing to the same memory space
+
+console.log(sheeps === cloneSheeps);
+// false --> it's pointing to a new memory space
+```
+
+### Problem with Reference Values
+If you ever dealt with Redux or any state management framework. You will know immutability is super important. Let me briefly explain. An immutable object is an object where the state can't be modified after it is created. The problem with JavaScript is that arrays are mutable. So this can happen:
+
+```javascript
+const sheeps = [1, 2];
+
+const sheeps2 = sheeps;
+
+sheeps2.push(3);
+
+console.log(sheeps2);
+// [1, 2, 3]
+
+// Ahhh, our original sheeps have changed?!
+console.log(sheeps);
+// [1, 2, 3]
+```
+
+That's why we need to clone an array:
+
+```javascript
+const sheeps = [1, 2];
+
+const sheeps2 = [ ...sheeps ];
+
+sheeps2.push(3);
+
+console.log(sheeps2);
+// [1, 2] Yay, our original sheeps is not affected!
 
 
+console.log(sheeps);
+// [1, 2, 3]
+```
+
+### Mutable vs Immutable Data Types
+Mutable:
+
+1. object
+2. array
+3. function
+
+Immutable:
+All primitives are immutable.
+
+1. string
+2. number
+3. boolean
+4. null
+5. undefined
+6. symbol
+
+### Shallow Copy Only
+Please note spread only goes one level deep when copying an array. So if you're trying to copy a multi-dimensional arrays, you will have to use other alternatives.
+
+```javascript
+const nums = [
+  [1, 2], 
+  [10],
+];
+
+const cloneNums = [...nums];
+
+// Let's change the first item in the first nested item in our cloned array.
+cloneNums[0][0] = '3';
+
+console.log(cloneNums);
+// [ [ '3', 2 ], [ 10 ] ]
+ 
+// NOOooo, the original is also affected
+console.log(nums);
+// [ [ '3', 2 ], [ 10 ] ]
+```
+
+Here's an interesting thing I learned. **Shallow copy means the first level is copied, deeper levels are referenced**.
+
+### Array.from
+
+Array.from is Another Way to Clone 
+
+```javascript
+const sheeps = [1, 2, 3];
+
+const cloneSheeps = Array.from(sheeps);
+
+console.log(sheeps === cloneSheeps); // false
+```
 
