@@ -1,0 +1,20 @@
+{
+  "name": "udemy-React-TheCompleteGuide",
+  "version": "1.0.0",
+  "description": "[React - The Complete Guide (incl Hooks, React Router, Redux)](https://www.udemy.com/react-the-complete-guide-incl-redux/learn/lecture/13914110?start=0#overview)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xgirma/udemy-React-TheCompleteGuide.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/xgirma/udemy-React-TheCompleteGuide/issues"
+  },
+  "homepage": "https://github.com/xgirma/udemy-React-TheCompleteGuide#readme"
+}
