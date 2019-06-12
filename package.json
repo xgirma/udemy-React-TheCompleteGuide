@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/xgirma/udemy-React-TheCompleteGuide/issues"
   },
-  "homepage": "https://github.com/xgirma/udemy-React-TheCompleteGuide#readme"
+  "homepage": "https://github.com/xgirma/udemy-React-TheCompleteGuide#readme",
+  "dependencies": {
+    "create-react-app": "^3.0.1"
+  }
 }

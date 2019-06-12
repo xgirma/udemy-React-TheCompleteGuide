@@ -119,7 +119,7 @@ console.log(anotherPerson.name); // Bob
 
 _anotherPerson_ have the same value as the first _person_ but it will not actually have copied the value of the person object. Instead, _anotherPerson_ store a pointer to the _person_ object in memory. 
 
-The same apply for arrays. 
+The same apply for arrays. Can you see the problem here? When we change new-object, we also automatically change the old-object. Vise-versa. This is because they both refer to the same object in memory. In most cases this is unwanted behaviour and bad practice.
 
 This is important in React. 
 
@@ -279,3 +279,20 @@ const cloneSheeps = Array.from(sheeps);
 console.log(sheeps === cloneSheeps); // false
 ```
 
+### Object.assign
+```javascript
+const person = {
+  name: 'John',
+  age: 28
+}
+
+const newPerson = Object.assign({}, person, {
+  age: 30
+})
+
+console.log(newPerson === person); // false
+console.log(person); // { name: 'John', age: 28 }
+console.log(newPerson); // { name: 'John', age: 30 }
+```
+
+Object.assign is an ES6 feature that takes objects as parameters. It will merge all objects you pass it into the first one. You are probably wondering why the first parameter is an empty object {}. If the first parameter would be ‘person’ we would still mutate person. If it would be { age: 30 }, we’d overwrite 30 with 28 again because that would be coming after. This solution works, we kept person intact, we treated it as immutable!
