@@ -31,10 +31,11 @@ class BindingClass extends Component {
   };
   
   render() {
+    const style = { backgroundColor: 'white', boarder: '3px solid blue'}
     return (
       <div className="App">
         <h3> Two way binding Class ... </h3>
-        <button onClick={this.switchNameHandler}>Change Name</button>
+        <button onClick={this.switchNameHandler} style={style}>Change Name</button>
         <Person name={this.state.person[0].name}
         >Seattle</Person>
         <Person
