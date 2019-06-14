@@ -717,4 +717,4 @@ export default StateClassDataWithBind;
 ``` 
 Opinion: using .bind is considered perform better than using arrow function.
 
-   
+# Two way data-binding   

@@ -3,7 +3,10 @@ import Person from './Person';
 import StateClass from './state/StateClass';
 import StateFunc from './state/StateFunc';
 import StateFuncData from './stateData/StateFuncData';
+import StateClassData from './stateData/StateClassData';
 import StateClassDataWithBind from './stateData/StateClassDataWithBind';
+import BindingClass from './twoWayDataBinding/BindingClass';
+import BindingFunc from './twoWayDataBinding/BindingFunc';
 
 const App = () => {
   return (
@@ -13,7 +16,10 @@ const App = () => {
       <StateClass/>
       <StateFunc/>
       <StateFuncData/>
+      <StateClassData/>
       <StateClassDataWithBind/>
+      <BindingClass/>
+      <BindingFunc/>
     </div>
   );
 };
