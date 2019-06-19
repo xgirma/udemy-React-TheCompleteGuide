@@ -146,3 +146,25 @@ class Person extends Component {
 
 export default Radium(Person);
 ```
+
+# CSS Modules
+
+CSS Modules are a relatively new concept (you can dive super-deep into them here: https://github.com/css-modules/css-modules). With CSS modules, you can write normal CSS code and make sure, that it only applies to a given component.
+
+It's not using magic for that, instead it'll simply automatically generate unique CSS class names for you. And by importing a JS object and assigning classes from there, you use these dynamically generated, unique names. So the imported JS object simply exposes some properties which hold the generated CSS class names as values.
+
+Example:
+
+```css
+.Post {
+        color: red;
+    }
+```
+
+```javascript
+import classes from './Post.css';
+     
+const post = () => (
+  <div className={classes.Post}>...</div>
+);
+```
