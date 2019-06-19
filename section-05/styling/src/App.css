@@ -10,3 +10,11 @@
   padding: 16px;
   text-align: center;
 }
+
+.red {
+  color: crimson;
+}
+
+.bold {
+  font-weight: bold;
+}

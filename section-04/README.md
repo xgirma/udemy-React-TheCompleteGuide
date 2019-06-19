@@ -1,4 +1,4 @@
-# Working with Lists and Conditionals
+# Section 4: Working with Lists and Conditionals
 
 setState() Gate: Navigating React setState() Behavior Confusion
 https://medium.com/javascript-scene/setstate-gate-abc10a9b2d82

@@ -1,4 +1,4 @@
-# Next Gen-JavaScript
+# Refreshing Next Generation JavaScript
 
 ## Class
 
