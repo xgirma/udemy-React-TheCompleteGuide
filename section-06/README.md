@@ -1,4 +1,6 @@
-# Error Boundaries
+# Section 6: Debugging React Apps
+
+## Error Boundaries
 
 [official doc](https://reactjs.org/docs/error-boundaries.html) 
 
@@ -55,3 +57,7 @@ class ErrorBoundary extends Component {
       <ErrorBoundary><BuggyCounter/></ErrorBoundary>
       <ErrorBoundary><BuggyCounter/></ErrorBoundary>
 ```
+
+## Finding Logical Errors by using Dev Tools & Sourcemaps
+
+[Debugging JavaScript in Chrome DevTools](https://developers.google.com/web/tools/chrome-devtools/javascript/)
