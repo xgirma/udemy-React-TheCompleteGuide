@@ -8,7 +8,7 @@
 
 <img width="736" alt="Screen Shot 2019-06-19 at 3 08 45 PM" src="https://user-images.githubusercontent.com/5876481/59804792-313ec580-92a4-11e9-90c7-2adadec76bd4.png">
 
-### Component creation
+### Component creation lifecycle methods
 <img width="736" alt="Screen Shot 2019-06-19 at 3 14 59 PM" src="https://user-images.githubusercontent.com/5876481/59805049-086b0000-92a5-11e9-997c-68304ea58386.png">
 
 component lifecycle is only available in class-based components. Functional components, when using React hooks have an equivalent. You could say generally, it's only available in class-based components.
@@ -133,7 +133,7 @@ class App extends Component {
 export default App;
 ```
 
-### Component update
+### Component update lifecycle methods
 <img width="736" alt="Screen Shot 2019-06-19 at 4 21 40 PM" src="https://user-images.githubusercontent.com/5876481/59807818-5df7da80-92ae-11e9-8ff9-89174af692fc.png">
 
 Just as we have a lifecycle for the component creation, we also have one for updating components. So when props or state change which are the two triggers you have for a component to be re-evaluated by React.
@@ -218,3 +218,145 @@ class Persons extends Component {
 
 export default Persons;
 ```
+
+### lifecycle hooks for functional component
+Before functional components were used as a presentational component. Now with the help of hooks you can actually build your entire app using functional components.
+
+#### useEffect
+useEffect is the second most important React hook you can use next to useState because useEffect basically **combines the functionality or the use cases you can cover of all these class-based lifecycle hooks**. 
+
+You can add useEffect anywhere here in your functional component body and useEffect as a default takes a function that will **"run for every render cycle"**.
+
+**SEE: 03-lifecycle-method-functional**
+ 
+React will basically re-render app.js when we type because in app.js, we manage the state of the Persons components that state changes when we type and therefore it calls the render method of app.js
+
+We have cockpit in app.js and so the cockpit gets re-rendered too. As always when I say **re-rendered**, I don't mean in the real DOM as you will learn but in that **virtual DOM**, React will check if it needs to touch the real DOM. We can prevent this. 
+
+    useEffect <==> componentDidUpdate
+
+So useEffect runs here, it runs for every update and this means _we can already use it for all the things we would have done_ in **componentDidUpdate** and indeed that is OK. If you need to send an HTTP request or anything like that in here, you can do that.
+
+    useEffect <==> componentDidUpdate
+
+useEffect also obviously runs when the component is created, right because if I quickly save this and I, it executed because it executes for every render cycle and that includes the first one. **So it is componentDidMount and componentDidUpdate combined in one effect**.
+
+Now some hooks like **getDerivedStateFromProps** is not included in here but you also don't really need it because if you have props here and you want to base your state on that, well then you can **useState** and pass some data from your props as an initial state into this, right? So you have that built into this because it is a functional component per definition. useEffect is for the other, more important and useful lifecycle hooks I'd say.
+
+    using useEffect for first render only
+
+Now what if we were to send an HTTP request here but we only want to do that when the component is rendered for the **first time only** and not for every re-render cycle. 
+
+Well for that, you can add a **second argument here to useEffect**, that second argument is an array where you simply point at all the variables or all the data that actually are used in your effect. 
+
+```javascript
+  useEffect(() => {
+    console.log('[Cockpit.js][FUNCTIONAL] useEffect', props);
+    setTimeout(() => {
+      alert('Saved data to cloud');
+    }, 1000)
+  },[]);
+```
+
+you can pass an empty array, you have to pass an array, that's important but it's empty. This tells React this effect has **no dependencies** and it should rerun whenever one of the dependencies changes. Now if you have no dependencies, they can never change and therefore this can never rerun, it will run for the first time, that is the default but it will never run again.
+
+So if you just need **componentDidMount**, you would use useEffect with an empty array passed as a second argument to the useEffect function. If you have a dependency on a certain field, you do what we did before, you pass that field in here and of course, you can have multiple fields you will depend on.
+
+### Component cleanup lifecycle methods
+
+    class: componentWillUnmount()
+    functional: useEffect()
+    
+```javascript
+import React, {Component} from 'react';
+import Person from './Person/Person';
+
+class Persons extends Component {
+  state = {};
+  
+  static getDerivedStateFromProps(props, state){
+    console.log('[Persons.js][CREATE] [UPDATE] getDerivedStateFormProps', props);
+    return state;
+  }
+  
+  shouldComponentUpdate(nextProps, nextState, nextContext) {
+    console.log('[Persons.js] [UPDATE] shouldComponentUpdate');
+    return true;
+  }
+  
+  getSnapshotBeforeUpdate(prevProps, prevState) {
+    console.log('[Persons.js] [UPDATE] getSnapshotBeforeUpdate');
+    return null;
+  }
+  
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    console.log('[Persons.js] [UPDATE] componentDidUpdate');
+  }
+  
+  componentWillUnmount() {
+    console.log('[Persons.js][CLEANUP] componentWillUnmount');
+  }
+  
+  render() {
+    console.log('[Persons.js] [CREATE][UPDATE] render');
+    
+    return this.props.persons.map((person, index) => {
+      return <Person
+        key={person.id}
+        click={() => this.props.deletePerson(index)}
+        name={person.name}
+        age={person.age}
+        changed={(event) => this.props.nameChange(event, person.id)}
+      />
+    })
+  };
+}
+
+export default Persons;
+```
+
+<img width="736" alt="Screen Shot 2019-06-20 at 4 11 16 PM" src="https://user-images.githubusercontent.com/5876481/59886964-2a808300-9376-11e9-8432-d3df707b8cf4.png">
+
+````javascript
+/* eslint-disable react-hooks/exhaustive-deps */
+import React, {useEffect} from 'react';
+
+const Cockpit = (props) => {
+  useEffect(() => {
+    console.log('[Cockpit.js][FUNCTIONAL] useEffect', props);
+    setTimeout(() => {
+      alert('Saved data to cloud');
+    }, 1000);
+    
+    return () => {
+      console.log('[Cockpit.js][CLEANUP] cleanup work in useEffect');
+    }
+  },[]);
+  
+  const style = {
+    backgroundColor: 'white',
+    font: 'inherit',
+    border: '1px solid blue',
+    padding: '8px',
+    cursor: 'pointer'
+  };
+  
+  return(
+    <div>
+      <button
+        style={style}
+        onClick={() => props.toggle()}>Toggle Persons</button>
+    </div>
+  )
+};
+
+export default Cockpit;
+````
+
+<img width="736" alt="Screen Shot 2019-06-20 at 4 14 02 PM" src="https://user-images.githubusercontent.com/5876481/59887008-70d5e200-9376-11e9-8dd0-c99ff0f55ba8.png">
+
+### Optimization 
+    class: componentShouldUpdate()
+    functional: React.memo()
+    
+Abc ...
