@@ -359,4 +359,36 @@ export default Cockpit;
     class: componentShouldUpdate()
     functional: React.memo()
     
-Abc ...
+Now persons.js already gets re-rendered when something changes in app.js, because persons is the child component of app.js.
+
+So whenever we change something in app.js, even if that only affects the cockpit or anything else in app.js but not persons, the persons child still gets re-rendered because that render function here gets called and therefore this whole function executes and React will go through that entire component tree, that is how it works. 
+
+Let us remove the Cockpit without re-rending the Persons component. 
+
+<img width="736" alt="Screen Shot 2019-06-20 at 5 50 23 PM" src="https://user-images.githubusercontent.com/5876481/59890039-f8761d80-9383-11e9-902a-ad1ece2ffea0.png"> 
+
+```javascript
+  shouldComponentUpdate(nextProps, nextState, nextContext) {
+    console.log('[Persons.js] [UPDATE] shouldComponentUpdate');
+    return nextProps.persons !== this.props.persons;
+  }
+```
+
+<img width="736" alt="Screen Shot 2019-06-20 at 6 08 16 PM" src="https://user-images.githubusercontent.com/5876481/59890575-66234900-9386-11e9-9285-d0b9c4baeffa.png">
+
+#### Using Chrome to check real DOME render
+
+In Chrome, you can actually go to more tools and then rendering and there you can enable paint flashing. That can be useful because it allows you to see what really gets re-rendered because it's highlighted with a green look then. So if I now click on here, you see a green flash, this was really rendered in a real DOM. So this is what gets rendered in the real DOM and not what gets rendered virtually by React.
+
+<img width="736" alt="Screen Shot 2019-06-20 at 6 10 06 PM" src="https://user-images.githubusercontent.com/5876481/59890636-a8e52100-9386-11e9-8739-fa59ad7c6f13.png">
+
+React memo is a great way of also getting optimization for your functional components and therefore it is a good idea to wrap functional components that might not need to update with every change in the parent component with it.
+
+### PureComponent instead of shouldComponentUpdate 
+
+every functional component could be wrapped with React memo and every class-based component could implement shouldComponentUpdate. Is that wise? Now this might sound like a good idea but it actually isn't.
+
+Otherwise if you're pretty sure that in all or almost all cases where your parent updates, you will need to update too, then you should not add shouldComponentUpdate or React memo because you will just execute some extra logic that makes no sense and actually just slows down the application a tiny bit.
+
+So if that is what you need, you can also just use pure component instead of manually implementing this shouldComponentUpdate check. he result will be the same, so you can do either of these but of course you can save some code if you use pure-component.
+
