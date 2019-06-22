@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import Persons from './../components/Persons';
 import Cockpit from './../components/Cockpit/Cockpit';
+import WithClass from './../hoc/WithClass';
 
 import './App.css';
 
@@ -63,7 +64,7 @@ class App extends Component {
           nameChange={this.nameChange}/>)
     }
     return (
-      <div className="App">
+      <WithClass classes="App">
         <button onClick={() => {this.setState({showCockpit:false})}}>Remove Cockpit</button>
         <h1>Hi, I'm a React App</h1>
         <p>{this.props.title}</p>
@@ -72,7 +73,7 @@ class App extends Component {
           <Cockpit toggle={this.togglePerson}/>
           : null}
         {personsList}
-      </div>
+      </WithClass>
     );
   }
 }

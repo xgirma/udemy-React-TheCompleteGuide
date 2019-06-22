@@ -392,3 +392,212 @@ Otherwise if you're pretty sure that in all or almost all cases where your paren
 
 So if that is what you need, you can also just use pure component instead of manually implementing this shouldComponentUpdate check. he result will be the same, so you can do either of these but of course you can save some code if you use pure-component.
 
+
+# Rendering Adjacent JSX Elements
+
+We are not allowed to return adjacent JSX elements on a root level. 
+
+Now this is not entirely true though because if you have a look at the persons component, there we actually return an array of persons, right? So that's not one single element, it's an array. Now technically, an array of course still is one object but with multiple elements. 
+
+```javascript
+import React, {Component} from 'react';
+import Person from './Person/Person';
+
+class Persons extends Component {  
+  render() {
+    console.log('[Persons.js] [CREATE][UPDATE] render');
+    
+    return this.props.persons.map((person, index) => { // array ...
+      return <Person
+        key={person.id}
+        click={() => this.props.deletePerson(index)}
+        name={person.name}
+        age={person.age}
+        changed={(event) => this.props.nameChange(event, person.id)}
+      />
+    })
+  };
+}
+
+export default Persons;
+```
+
+Indeed, React does allow us to return an array of adjacent elements as long as all the items in there have a key and that key is required so that React can efficiently update and reorder these elements as it might be required by your app.
+
+```javascript
+import React, {Component} from 'react';
+
+import './Person.css';
+
+class Person extends Component {
+  render() {
+    console.log('[Person.js] [CREATE] render');
+    return [
+      <p onClick={this.props.click} key="key1">I'm {this.props.name} and I am {this.props.age} years old!</p>,
+      <p key="key2">{this.props.children}</p>,
+      <input type="text" onChange={this.props.changed} value={this.props.name} key="key3"/>
+    ]
+  }
+}
+
+export default Person;
+```
+
+# Using React.Fragment
+A common pattern in React is for a component to return multiple elements. Fragments let you group a list of children without adding extra nodes to the DOM.
+
+```javascript
+/* eslint-disable react-hooks/exhaustive-deps */
+import React, {useEffect, Fragment} from 'react';
+
+const Cockpit = (props) => {
+  useEffect(() => {
+    console.log('[Cockpit.js][FUNCTIONAL] useEffect', props);
+    setTimeout(() => {
+      alert('Saved data to cloud');
+    }, 1000);
+    
+    return () => {
+      console.log('[Cockpit.js][CLEANUP] cleanup work in useEffect');
+    }
+  },[]);
+  
+  const style = {
+    backgroundColor: 'white',
+    font: 'inherit',
+    border: '1px solid blue',
+    padding: '8px',
+    cursor: 'pointer'
+  };
+  
+  return(
+    <Fragment>
+      <button
+        style={style}
+        onClick={() => props.toggle()}>Toggle Persons</button>
+    </Fragment>
+  )
+};
+
+export default Cockpit;
+```
+
+# Higher Order Components (HOC)
+
+```javascript
+import React from 'react';
+
+const withClass = props => (
+  <div className={props.classes}>
+    {props.children}
+  </div>
+);
+
+export default withClass;
+```
+
+I mentioned that the aux component is a so-called higher order component which is why it's placed in the hoc folder and it's named higher order component because all it does essentially is it wraps another component, it does not contain its own logic, its own styling or add any structure to the JSX code or to the real DOM that will be rendered, it just wraps another component and then maybe adds some extra logic to it.
+ 
+```javascript
+import React, {Component} from 'react';
+import Persons from './../components/Persons';
+import Cockpit from './../components/Cockpit/Cockpit';
+import WithClass from './../hoc/WithClass';
+
+import './App.css';
+
+class App extends Component {
+  constructor(props){
+    super(props);
+    console.log('[App.js] constructor');
+  }
+  
+  state = {
+    persons:[
+      { id: 'asfa1', name: 'Max', age: 28 },
+      { id: 'vasdf1', name: 'Min', age: 29 },
+      { id: 'asdf11', name: 'Avg', age: 26 }
+    ],
+    showPerson: false,
+    showCockpit: true,
+  };
+  
+  static getDerivedStateFromProps(props, state){
+    console.log('+++++++++++++++++++++++++');
+    console.log('[App.js] getDerivedStateFromProps', props);
+    return state;
+  }
+  
+  componentDidMount() {
+    console.log('[App.js] componentDidMount');
+  }
+  
+  nameChange = (e, id) => {
+    const index = this.state.persons.findIndex(p => p.id === id);
+    const person = {...this.state.persons[index]};
+    person.name = e.target.value;
+    const persons = [...this.state.persons];
+    persons[index] = person;
+    this.setState({persons});
+  };
+  
+  deletePerson = (index) => {
+    const persons = [...this.state.person];
+    persons.splice(index, 1);
+    this.setState({persons});
+  };
+  
+  togglePerson = () => {
+    const doesShow = this.state.showPerson;
+    this.setState({ showPerson: !doesShow});
+    console.log('person toggle is clicked');
+  };
+  
+  render() {
+    console.log('[App.js] render');
+    let personsList = null;
+    
+    if(this.state.showPerson){
+      personsList = (
+        <Persons
+          persons={this.state.persons}
+          deletePerson={this.deletePerson}
+          nameChange={this.nameChange}/>)
+    }
+    return (
+      <WithClass classes="App">
+        <button onClick={() => {this.setState({showCockpit:false})}}>Remove Cockpit</button>
+        <h1>Hi, I'm a React App</h1>
+        <p>{this.props.title}</p>
+        
+        {this.state.showCockpit ?
+          <Cockpit toggle={this.togglePerson}/>
+          : null}
+        {personsList}
+      </WithClass>
+    );
+  }
+}
+
+export default App;
+```
+
+# Another HOC 
+The other way of creating a HOC does not work by returning a functional component here but instead by using a regular Javascript function where the first argument will actually be our wrapped component and the second argument then is something that you need in your higher order component
+
+So in the end, I have a function that returns a function and the function that I return is a functional component. 
+
+
+
+
+
+
+
+Which approach should you use?
+
+First approach: like this one actually would be that mostly change the HTML code or change some styling and I would argue that those best go into your JSX code as a wrapping component, so what we had before.
+
+Second approach: There are other higher order components that add some **behind the scenes logic**, some Javascript code that handles errors or sends analytics data or anything like that. Such higher order components maybe should be used or should be written in this style here to really make it clear that they're not so much involved in the JSX code that gets rendered but in the logic that runs but as you see at this example, you can ultimately write any higher order component in any way.
+
+
+
