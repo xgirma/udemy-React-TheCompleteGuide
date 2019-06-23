@@ -587,17 +587,236 @@ The other way of creating a HOC does not work by returning a functional componen
 
 So in the end, I have a function that returns a function and the function that I return is a functional component. 
 
-
-
-
-
-
-
 Which approach should you use?
 
 First approach: like this one actually would be that mostly change the HTML code or change some styling and I would argue that those best go into your JSX code as a wrapping component, so what we had before.
 
 Second approach: There are other higher order components that add some **behind the scenes logic**, some Javascript code that handles errors or sends analytics data or anything like that. Such higher order components maybe should be used or should be written in this style here to really make it clear that they're not so much involved in the JSX code that gets rendered but in the logic that runs but as you see at this example, you can ultimately write any higher order component in any way.
 
+# Setting State Correctly
+Affected only for class based component. How could setState could be used in an invalid way?
 
+e.g. we want to count every key for an input element and increment a state. 
 
+```javascript
+import React, {Component} from 'react';
+import Persons from './../components/Persons';
+import Cockpit from './../components/Cockpit/Cockpit';
+import withClass from '../hoc/withClass';
+
+import './App.css';
+
+class App extends Component {
+  constructor(props){
+    super(props);
+    console.log('[App.js] constructor');
+  }
+  
+  state = {
+    persons:[
+      { id: 'asfa1', name: 'Max', age: 28 },
+      { id: 'vasdf1', name: 'Min', age: 29 },
+      { id: 'asdf11', name: 'Avg', age: 26 }
+    ],
+    showPerson: false,
+    showCockpit: true,
+    changeCounter: 0, // ...
+  };
+  
+  static getDerivedStateFromProps(props, state){
+    console.log('+++++++++++++++++++++++++');
+    console.log('[App.js] getDerivedStateFromProps', props);
+    return state;
+  }
+  
+  componentDidMount() {
+    console.log('[App.js] componentDidMount');
+  }
+  
+  nameChange = (e, id) => {
+    const index = this.state.persons.findIndex(p => p.id === id);
+    const person = {...this.state.persons[index]};
+    person.name = e.target.value;
+    const persons = [...this.state.persons];
+    persons[index] = person;
+    this.setState({persons});
+  };
+  
+  deletePerson = (index) => {
+    const persons = [...this.state.persons];
+    persons.splice(index, 1);
+    this.setState({persons, changeCounter: this.state.changeCounter + 1}); // ...
+  };
+  
+  togglePerson = () => {
+    const doesShow = this.state.showPerson;
+    this.setState({ showPerson: !doesShow});
+    console.log('person toggle is clicked');
+  };
+  
+  render() {
+    console.log('[App.js] render');
+    let personsList = null;
+    
+    if(this.state.showPerson){
+      personsList = (
+        <Persons
+          persons={this.state.persons}
+          deletePerson={this.deletePerson}
+          nameChange={this.nameChange}/>)
+    }
+    return (
+      <div>
+        <button onClick={() => {this.setState({showCockpit:false})}}>Remove Cockpit</button>
+        <h1>Hi, I'm a React App</h1>
+        <p>{this.props.title}</p>
+        
+        {this.state.showCockpit ?
+          <Cockpit toggle={this.togglePerson}/>
+          : null}
+        {personsList}
+      </div>
+    );
+  }
+}
+
+export default withClass(App, "App");
+``` 
+
+So it seems to work, right and yet it is the wrong way of updating this. Behind the scenes, **setState does not immediately trigger an update of the state of this component in a re-render cycle**, instead it's basically **scheduled by React** and React will then perform the state update and the re-render cycle when it has the available resources to do that. 
+
+You call set state synchronously here but it's not guaranteed to execute and finish immediately and therefore, this state when used for a state update is not guaranteed to be the latest state or the previous state on which you depend, it could be an older state.
+
+    therefore, this.state when used for a state update is not guaranteed to be the latest state or the previous state on which you depend, it could be an older state.
+
+Then the state you depending on here might be an unexpected state, it might not be the previous state you would expect it to be and therefore there is a better way of updating state when you are depending on the old state. 
+
+**setState** does not only take a Javascript **object**, it also works when you pass in a **function**, so you can use either syntax.
+
+```javascript
+import React, {Component} from 'react';
+import Persons from './../components/Persons';
+import Cockpit from './../components/Cockpit/Cockpit';
+import withClass from '../hoc/withClass';
+
+import './App.css';
+
+class App extends Component {
+  constructor(props){
+    super(props);
+    console.log('[App.js] constructor');
+  }
+  
+  state = {
+    persons:[
+      { id: 'asfa1', name: 'Max', age: 28 },
+      { id: 'vasdf1', name: 'Min', age: 29 },
+      { id: 'asdf11', name: 'Avg', age: 26 }
+    ],
+    showPerson: false,
+    showCockpit: true,
+    changeCounter: 0,
+  };
+  
+  static getDerivedStateFromProps(props, state){
+    console.log('+++++++++++++++++++++++++');
+    console.log('[App.js] getDerivedStateFromProps', props);
+    return state;
+  }
+  
+  componentDidMount() {
+    console.log('[App.js] componentDidMount');
+  }
+  
+  nameChange = (e, id) => {
+    const index = this.state.persons.findIndex(p => p.id === id);
+    const person = {...this.state.persons[index]};
+    person.name = e.target.value;
+    const persons = [...this.state.persons];
+    persons[index] = person;
+    
+    // wrong
+    // this.setState({persons, changeCounter: this.state.changeCounter + 1});
+    
+    // correct
+    this.setState((prevState, props) => {
+      return {persons, changeCounter: prevState.changeCounter + 1}
+    });
+  };
+  
+  deletePerson = (index) => {
+    const persons = [...this.state.persons];
+    persons.splice(index, 1);
+    this.setState({persons});
+  };
+  
+  togglePerson = () => {
+    const doesShow = this.state.showPerson;
+    this.setState({ showPerson: !doesShow});
+    console.log('person toggle is clicked');
+  };
+  
+  render() {
+    console.log('[App.js] render');
+    let personsList = null;
+    
+    if(this.state.showPerson){
+      personsList = (
+        <Persons
+          persons={this.state.persons}
+          deletePerson={this.deletePerson}
+          nameChange={this.nameChange}/>)
+    }
+    return (
+      <div>
+        <button onClick={() => {this.setState({showCockpit:false})}}>Remove Cockpit</button>
+        <h1>Hi, I'm a React App</h1>
+        <p>{this.props.title}</p>
+        
+        {this.state.showCockpit ?
+          <Cockpit toggle={this.togglePerson}/>
+          : null}
+        {personsList}
+      </div>
+    );
+  }
+}
+
+export default withClass(App, "App");
+```
+
+# Using PropTypes
+
+```javascript
+import React, {Component} from 'react';
+import PropTypes from 'prop-types';
+
+import './Person.css';
+
+class Person extends Component {
+  render() {
+    console.log('[Person.js] [CREATE] render');
+    return [
+      <p onClick={this.props.click} key="key1">I'm {this.props.name} and I am {this.props.age} years old!</p>,
+      <p key="key2">{this.props.children}</p>,
+      <input type="text" onChange={this.props.changed} value={this.props.name} key="key3"/>
+    ]
+  }
+}
+
+Person.propTypes = {
+  name: PropTypes.string,
+  age: PropTypes.number,
+  changed: PropTypes.func,
+  click: PropTypes.func,
+};
+
+export default Person;
+```
+
+# Using Refs
+
+// TODO ...
+
+# Context API and prop-chain problem
+ 
