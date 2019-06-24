@@ -1111,5 +1111,3 @@ const Cockpit = (props) => {
 
 export default Cockpit;
 ```
-
-Abc ...
