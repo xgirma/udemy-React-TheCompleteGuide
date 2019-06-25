@@ -14,10 +14,11 @@ class BurgerBuilder extends Component {
     ingredients: {
       salad: 0,
       bacon: 0,
-      cheese: 2,
-      meat: 1
+      cheese: 0,
+      meat: 0
     },
-    totalPrice: 4
+    totalPrice: 4,
+    purchasable: false,
   };
   
   addIngredient = (type) => {
@@ -33,11 +34,15 @@ class BurgerBuilder extends Component {
       ingredients: updatedIngredients,
       totalPrice: newPrice
     });
+    // this.updatePurchaseState(); // state update issue
+    this.updatePurchaseState(updatedIngredients);
   };
   
   removeIngredient = (type) => {
     const oldCount = this.state.ingredients[type];
-    if(oldCount <= 0){ return };
+    if (oldCount <= 0) {
+      return
+    }
     const updatedCount = oldCount - 1;
     const updatedIngredients = {...this.state.ingredients};
     updatedIngredients[type] = updatedCount;
@@ -49,23 +54,37 @@ class BurgerBuilder extends Component {
       ingredients: updatedIngredients,
       totalPrice: newPrice
     });
+    // this.updatePurchaseState(); // state update issue
+    this.updatePurchaseState(updatedIngredients);
   };
   
+  updatePurchaseState = (ingredients) => {
+    // const ingredients = {...this.state.ingredients}; // state update issue
+    const sum = Object.keys(ingredients).map(igKey => {
+      return ingredients[igKey];
+    }).reduce((sum, el) => {
+      return sum + el
+    }, 0);
+    
+    this.setState({purchasable: sum > 0});
+  };
   
-  render(){
+  render() {
     const disabledInfo = {...this.state.ingredients};
     
-    for(let key in disabledInfo){
+    for (let key in disabledInfo) {
       disabledInfo[key] = disabledInfo[key] <= 0
     }
     
-    return(
+    return (
       <Fragment>
         <Burger ingredients={this.state.ingredients}/>
         <BuildControls
           ingredientAdded={this.addIngredient}
           ingredientsDeducted={this.removeIngredient}
-          disabled={disabledInfo} price={this.state.totalPrice}/>
+          disabled={disabledInfo}
+          purchasable={this.state.purchasable}
+          price={this.state.totalPrice}/>
       </Fragment>
     )
   }
